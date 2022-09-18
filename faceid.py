@@ -40,6 +40,7 @@ class CamApp(App):
         layout.add_widget(self.button)
         layout.add_widget(self.verification)
 
+
         # setup video capture
         self.capture = cv2.VideoCapture(0)
         Clock.schedule_interval(self.update, 1.0 / 33.0)
@@ -66,7 +67,7 @@ class CamApp(App):
         self.web_cam.texture = img_texture
 
     # adding preprocess function to scale and resize
-    def preprocess(file_path):
+    def preprocess(self, file_path):
         """
             In this function, we first read in the image and then load the image.
             After this we resize the image into 100px * 100px * 3 color channels.
@@ -79,18 +80,28 @@ class CamApp(App):
         return img
 
     # Adding verify function
-    def verify(model, detection_threshold, verification_threshold):
+    def verify(self, *args):
         """
             detection_threshold means the value above which a prediction is considered positive
             verification_threshold is proportion of positive predictions by total positive samples
         """
 
+        # defining detection and verification threshold
+        detection_threshold = 0.5
+        verification_threshold = 0.5
+
+        # Capture image for input
+        SAVE_PATH = os.path.join('application_data', 'input_image', 'input_image.jpg')
+        ret, frame = self.capture.read()
+        frame = frame[120:120 + 250, 200:200 + 250, :]
+        cv2.imwrite(SAVE_PATH, frame)
+
         # Build results array
         results = []
 
         for image in os.listdir(os.path.join('application_data', 'verification_images')):
-            input_img = preprocess(os.path.join('application_data', 'input_image', 'input_image.jpg'))
-            validation_img = preprocess(os.path.join('application_data', 'verification_images', image))
+            input_img = self.preprocess(os.path.join('application_data', 'input_image', 'input_image.jpg'))
+            validation_img = self.preprocess(os.path.join('application_data', 'verification_images', image))
 
             # Make Predictions
             result = model.predict(list(np.expand_dims([input_img, validation_img], axis=1)))
