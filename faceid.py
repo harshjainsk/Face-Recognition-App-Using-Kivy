@@ -77,6 +77,7 @@ class CamApp(App):
         img = tf.image.resize(img, (100, 100))
         img = img / 255.0
 
+    #
         return img
 
 
