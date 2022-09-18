@@ -89,8 +89,8 @@ class CamApp(App):
         """
 
         # defining detection and verification threshold
-        detection_threshold = 0.5
-        verification_threshold = 0.5
+        detection_threshold = 0.7
+        verification_threshold = 0.7
 
         # Capture image for input
         SAVE_PATH = os.path.join('application_data', 'input_image', 'input_image.jpg')
@@ -117,7 +117,13 @@ class CamApp(App):
         verified = verification > verification_threshold
 
         # set verification text
-        self.verification_label.text = 'Verified' if verification == True else 'Unverfied'
+        self.verification_label.text = 'Verified' if verified == True else 'Unverfied'
+
+
+        # log information into console
+        Logger.info(verified)
+        Logger.info(verification)
+        Logger.info(np.sum(np.array(results) > 0.5))
 
         return results, verified
 
