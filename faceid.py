@@ -31,15 +31,17 @@ class CamApp(App):
     def build(self):
         # Main layout components
         self.web_cam = Image(size_hint=(1, 0.8))
-        self.button = Button(text='Verify', size_hint=(1, 0.1))
-        self.verification = Label(text='Verification uninitalised', size_hint=(1, 0.1))
+        self.button = Button(text='Verify', on_press=self.verify, size_hint=(1, 0.1))
+        self.verification_label = Label(text='Verification uninitalised', size_hint=(1, 0.1))
 
         # Add items to layout
         layout = BoxLayout(orientation='vertical')
         layout.add_widget(self.web_cam)
         layout.add_widget(self.button)
-        layout.add_widget(self.verification)
+        layout.add_widget(self.verification_label)
 
+        # Load the siamese model
+        self.model = tf.keras.models.load_model('siamesemodel.h5', custom_objects={'L1Dist': L1Dist})
 
         # setup video capture
         self.capture = cv2.VideoCapture(0)
@@ -104,7 +106,7 @@ class CamApp(App):
             validation_img = self.preprocess(os.path.join('application_data', 'verification_images', image))
 
             # Make Predictions
-            result = model.predict(list(np.expand_dims([input_img, validation_img], axis=1)))
+            result = self.model.predict(list(np.expand_dims([input_img, validation_img], axis=1)))
             results.append(result)
 
         # Detection Threshold: Metric above which a prediction is considered positive
@@ -113,6 +115,9 @@ class CamApp(App):
         # Verification Threshold: Proportion of positive predictions / total positive samples
         verification = detection / len(os.listdir(os.path.join('application_data', 'verification_images')))
         verified = verification > verification_threshold
+
+        # set verification text
+        self.verification_label.text = 'Verified' if verification == True else 'Unverfied'
 
         return results, verified
 
