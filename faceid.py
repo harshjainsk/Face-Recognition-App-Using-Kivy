@@ -65,6 +65,20 @@ class CamApp(App):
         img_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
         self.web_cam.texture = img_texture
 
+    # adding preprocess function to scale and resize
+    def preprocess(file_path):
+        """
+            In this function, we first read in the image and then load the image.
+            After this we resize the image into 100px * 100px * 3 color channels.
+            Last line helps in scaling.
+        """
+        byte_image = tf.io.read_file(file_path)
+        img = tf.io.decode_jpeg(byte_image)  # loading of image
+        img = tf.image.resize(img, (100, 100))
+        img = img / 255.0
+
+        return img
+
 
 if __name__ == '__main__':
     CamApp().run()
